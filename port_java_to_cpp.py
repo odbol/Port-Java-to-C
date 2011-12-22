@@ -65,7 +65,7 @@ for line in fileContents:
 			className = matches.group(2)
 			curClassPost = matches.group(3)
 			
-			curClassPost = curClassPost.replace("extends", ":").replace("implments", ":")
+			curClassPost = curClassPost.replace("extends", ":").replace("implements", ":")
 			
 			newHFile.write(curClassPre + " " + className + " " + curClassPost + "{\n")
 			continue
