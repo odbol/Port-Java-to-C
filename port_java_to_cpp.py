@@ -4,14 +4,10 @@ This script takes an Java file and auto-ports it to C++. Well, the obvious borin
 It will replace certian Java keywords and types with their equivalents in C++, as well as generate
 separate header and implementation files for you (header files are so 1980's). 
 
-Disclaimer: *This is not Skynet*. It will definitely NOT generate code that compiles, except in the
-most basic case. It just does the boring work for you like typing everything twice, etc. Then you
-can get on with the fun stuff like dereferencing pointers, memory management, and all that you know
-and love about C.
+To use:
 
-Written by Tyler Freeman
-http://odbol.com
-This software is in the public domain. Do what you want with it!
+python port_java_to_cpp.py YourJavaFile.java
+
 """
 
 import sys
