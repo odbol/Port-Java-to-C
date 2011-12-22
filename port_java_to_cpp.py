@@ -1,7 +1,7 @@
 #!/bin/python
 instructions = """
 This script takes an Java file and auto-ports it to C++. Well, the obvious boring stuff anyway:
-It will replace certian Java keywords and types with their equivalents in C++, as well as generate
+It will replace certain Java keywords and types with their equivalents in C++, as well as generate
 separate header and implementation files for you (header files are so 1980's). 
 
 To use:
