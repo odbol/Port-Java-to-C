@@ -48,6 +48,12 @@ className = ""
 skipNextLine = 0
 isAdding = False
 
+newFile.write("#include \"" + newHFileName + "\"\n")
+
+newHFileDef = newHFileName.replace(".", "_")
+newHFile.write("#ifndef " + newHFileDef + "\n")
+newHFile.write("#define " + newHFileDef + "\n")
+
 isInFunction = False
 for line in fileContents:
 	i += 1
@@ -116,7 +122,8 @@ for line in fileContents:
 				
 		newFile.write(line)
 
-			
+newHFile.write("#endif\n")		
+
 newFile.close()
 newHFile.close()
 print "Done processing " + fileName
