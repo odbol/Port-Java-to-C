@@ -37,6 +37,10 @@ classIdent = re.compile(r"(.*)class (\w+) (.*){", re.IGNORECASE)
 funcIdent = re.compile(r"(.*)\s+(\w+)\((.*)\)\s?{", re.IGNORECASE)
 fieldIdent = re.compile(r"([^=]*)\s+(\w+)\s*(=.+)?\s*;", re.IGNORECASE)
 
+
+def removePPP(s):
+	return s.replace("public: ", "").replace("private: ", "").replace("protected: ", "")
+
 i = 0
 functionStack = 0
 curFunctionName = ""
@@ -50,12 +54,17 @@ newHFileDef = newHFileName.replace(".", "_")
 newHFile.write("#ifndef " + newHFileDef + "\n")
 newHFile.write("#define " + newHFileDef + "\n")
 
+newHFile.write("#include <string>\n") #when do you not use this, really?
+newHFile.write("using namespace std;\n")
+
 isInFunction = False
 for line in fileContents:
 	i += 1
 	#print "%s: %s" % (i, line)
 	
 	line = line.replace("String", "string").replace("final", "const").replace("@", "//@").replace("boolean", "bool").replace("this.", "this->")
+	line = line.replace("public ", "public: ").replace("private ", "private: ").replace("protected ", "protected: ")
+	line = line.replace("package", "//package").replace("import", "//import")
 	
 	if className == "":
 		matches = classIdent.search(line)
@@ -67,7 +76,7 @@ for line in fileContents:
 			
 			curClassPost = curClassPost.replace("extends", ":").replace("implements", ":")
 			
-			newHFile.write(curClassPre + " " + className + " " + curClassPost + "{\n")
+			newHFile.write("class " + removePPP(curClassPre) + className + " " + curClassPost + "{\n")
 			continue
 	
 	#only fix abstract functions, not classes
@@ -86,9 +95,12 @@ for line in fileContents:
 			blockStack = 0
 			
 			newHFile.write(curFunctionPre + " " + curFunctionName + "(" + curFunctionParams + ");\n")
-			newFile.write(curFunctionPre + " " + className + "::" + curFunctionName + "(" + curFunctionParams + ") {\n")
+			newFile.write(removePPP(curFunctionPre) + " " + className + "::" + curFunctionName + "(" + curFunctionParams + ") {\n")
 		else: #outside of function, must be field def.
-			newHFile.write(line)
+			if line.strip() == "}": #write end of class block
+				newHFile.write("};\n")
+			else:
+				newHFile.write(line)
 
 			matches = fieldIdent.search(line)
 			if matches:
@@ -102,7 +114,7 @@ for line in fileContents:
 				else:
 					curFunctionParams = " " + curFunctionParams
 				
-				newFile.write(curFunctionPre + " " + className + "::" + curFunctionName + curFunctionParams + ";\n")
+				newFile.write(removePPP(curFunctionPre) + " " + className + "::" + curFunctionName + curFunctionParams + ";\n")
 			else: #must be a comment or something weird
 				if line.strip() != "}": #don't write end of class block
 					newFile.write(line)
