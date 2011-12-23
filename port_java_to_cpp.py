@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/python
 instructions = """
 This script takes an Java file and auto-ports it to C++. Well, the obvious boring stuff anyway:
 It will replace certain Java keywords and types with their equivalents in C++, as well as generate
@@ -48,21 +48,21 @@ className = ""
 skipNextLine = 0
 isAdding = False
 
-newFile.write("#include \"" + newHFileName + "\"\n")
+newFile.write("#include \"" + newHFileName.split("/").pop() + "\"\n")
 
-newHFileDef = newHFileName.replace(".", "_")
+newHFileDef = newHFileName.replace(".", "_").split("/").pop()
 newHFile.write("#ifndef " + newHFileDef + "\n")
-newHFile.write("#define " + newHFileDef + "\n")
+newHFile.write("#define " + newHFileDef + "\n\n")
 
 newHFile.write("#include <string>\n") #when do you not use this, really?
-newHFile.write("using namespace std;\n")
+newHFile.write("using namespace std;\n\n")
 
 isInFunction = False
 for line in fileContents:
 	i += 1
 	#print "%s: %s" % (i, line)
 	
-	line = line.replace("String", "string").replace("final", "const").replace("@", "//@").replace("boolean", "bool").replace("this.", "this->")
+	line = line.replace("String", "string").replace("final", "const").replace("@", "//@").replace("boolean", "bool").replace("this.", "this->").replace("null", "NULL")
 	line = line.replace("public ", "public: ").replace("private ", "private: ").replace("protected ", "protected: ")
 	line = line.replace("package", "//package").replace("import", "//import")
 	
@@ -97,11 +97,6 @@ for line in fileContents:
 			newHFile.write(curFunctionPre + " " + curFunctionName + "(" + curFunctionParams + ");\n")
 			newFile.write(removePPP(curFunctionPre) + " " + className + "::" + curFunctionName + "(" + curFunctionParams + ") {\n")
 		else: #outside of function, must be field def.
-			if line.strip() == "}": #write end of class block
-				newHFile.write("};\n")
-			else:
-				newHFile.write(line)
-
 			matches = fieldIdent.search(line)
 			if matches:
 				print "found field: %s" % line
@@ -114,10 +109,14 @@ for line in fileContents:
 				else:
 					curFunctionParams = " " + curFunctionParams
 				
+				newHFile.write(curFunctionPre + " " + curFunctionName + ";\n")
 				newFile.write(removePPP(curFunctionPre) + " " + className + "::" + curFunctionName + curFunctionParams + ";\n")
 			else: #must be a comment or something weird
-				if line.strip() != "}": #don't write end of class block
-					newFile.write(line)
+				if line.strip() != "}": 
+					newFile.write(line) 
+					newHFile.write(line)
+				else: #write end of class block for header file only
+					newHFile.write("};\n")  
 	else:
 		if line.find("{") >= 0:
 			blockStack += 1
@@ -130,7 +129,7 @@ for line in fileContents:
 				
 		newFile.write(line)
 
-newHFile.write("#endif\n")		
+newHFile.write("\n\n#endif\n")		
 
 newFile.close()
 newHFile.close()
